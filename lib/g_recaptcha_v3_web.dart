@@ -2,13 +2,12 @@
 library g_recaptcha_v3_web;
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'package:web/web.dart' as web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:js/js.dart';
-import 'package:js/js_util.dart' as js_util;
 
 @JS('flutter_g_recaptcha_v3_key')
 external set _gRecaptchaV3Key(String key);
@@ -16,14 +15,13 @@ external set _gRecaptchaV3Key(String key);
 external String get _gRecaptchaV3Key;
 
 @JS('ready')
-external Future _ready(void Function() f);
+external JSPromise _ready(JSExportedDartFunction f);
 
 @JS('execute')
-external Future<String> _execute(String action, _Options options);
+external JSPromise<JSString> _execute(String action, _Options options);
 
 @JS()
-@anonymous
-class _Options {
+extension type _Options._(JSObject o) implements JSObject {
   external String get action;
   external factory _Options({String action});
 }
@@ -59,10 +57,11 @@ class GRecaptchaV3PlatformInterface {
     if (!kIsWeb) return false;
     try {
       _gRecaptchaV3Key = key;
-      await _ready(allowInterop(() {
+      await _ready(() {
         debugPrint('gRecaptcha V3 ready');
         changeVisibility(showBadge);
-      }));
+      }.toJS)
+          .toDart;
       return true;
     } catch (e) {
       debugPrint("Error: Looks like reCaptcha js is not loaded yet."
@@ -79,8 +78,9 @@ class GRecaptchaV3PlatformInterface {
       throw Exception('gRecaptcha V3 key not set : Try calling ready() first.');
     }
     try {
-      String? result = await js_util.promiseToFuture<String>(
-          await _execute(_gRecaptchaV3Key, _Options(action: action)));
+      String? result =
+          (await _execute(_gRecaptchaV3Key, _Options(action: action)).toDart)
+              .toDart;
       return result;
     } catch (e) {
       debugPrint(e.toString());
