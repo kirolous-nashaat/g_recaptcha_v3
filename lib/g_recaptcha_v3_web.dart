@@ -2,7 +2,7 @@
 library g_recaptcha_v3_web;
 
 import 'dart:async';
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -92,8 +92,10 @@ class GRecaptchaV3PlatformInterface {
   /// change the reCaptcha badge visibility
   static Future<void> changeVisibility(bool showBagde) async {
     if (!kIsWeb) return;
-    var badge = html.document.querySelector(".grecaptcha-badge");
+    var badge =
+        web.document.querySelector(".grecaptcha-badge") as web.HTMLElement;
     if (badge == null) return;
+
     badge.style.zIndex = "10";
     badge.style.visibility = showBagde ? "visible" : "hidden";
   }
